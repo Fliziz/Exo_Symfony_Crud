@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1>Ajouter un utilisateur</h1>
+    <form method="post" class="mt-4">
+
+        <div class="form-group mt-3">
+            <label for="titre">Titre</label>
+            <input type="titre" id="titre" name="titre" class="form-control" required>
+        </div>
+
+        <div class="form-group mt-3">
+            <label for="contenu">Contenu</label>
+            <input type="contenu" id="contenu" name="contenu" class="form-control" required>
+        </div>
+
+        <div class="form-group mt-3">
+            <label for="id_categorie">categorie</label>
+            <select name="id_categorie" id="id_categorie">
+                {% for categorie in categories %}
+                    <option value="{{ categorie.id }}">{{ categorie.nom}}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-success mt-3">Enregistrer</button>
+        <a href="{{ path('articles_index') }}" class="btn btn-secondary mt-3">Retour</a>
+    </form>
+</div>
+{% endblock %}
