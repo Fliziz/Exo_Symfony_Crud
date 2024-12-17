@@ -39,6 +39,7 @@
                     <td>{{ article.contenu }}</td>
                     <td>{{ article.Idcategorie.nom }}</td>
                     <td>
+                        <a href="{{ path('article_show', {id: article.id}) }}" class="btn btn-primary btn-sm">Show</a>
                         {% if is_granted('ROLE_ADMIN') %}
                         <a href="{{ path('articles_edit', {id: article.id}) }}" class="btn btn-primary btn-sm">Modifier</a>
                         <form action="{{ path('articles_delete', {id: article.id}) }}" method="post" style="display: inline;">

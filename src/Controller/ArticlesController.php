@@ -7,6 +7,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Repository\ArticlesRepository;
 use App\Repository\CategorieRepository;
+use App\Repository\CommentaireRepository;
 use App\Entity\Articles;
 use App\Entity\Categorie;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,6 +23,7 @@ class ArticlesController extends AbstractController
         $categories = $categoriesRepository->findAll();
         if($request->isMethod('POST')){
             $articles = $articlesRepository->findBy(['id_categorie' => $request->request->get('filtre')]);//findBy permet de retourner un tableau d'objet d'articles, en fonction des critaire ['id_categorie' définie l'attribut a récupérer => ou c'est egale a la requete qui retourne le filtre donc soit 1 (donc jeux video) ou 2 (donc anime)]
+            dd($articles);
         }else{
             $articles = $articlesRepository->findAll(); // Appelle la méthode findAll() du UserRepository pour récupérer tous les utilisateurs dans la base de données
         }
@@ -98,5 +100,22 @@ class ArticlesController extends AbstractController
         $em->flush(); // Sauvegarde la suppression dans la base de données
 
         return $this->redirectToRoute('articles_index'); // Redirige vers la liste des utilisateurs après suppression
+    }
+
+    
+    #[Route('/{id}', name: 'article_show', methods: ['GET'])]
+    public function show(Articles $article, CommentaireRepository $commentaireRepository): Response
+    {
+        
+         // Récupérer l'ID de la catégorie depuis le formulaire
+         $articleId = $article->getid();
+
+         // Rechercher l'entité Categorie correspondante
+         $commentaires = $commentaireRepository->findBy(['id_article' =>$articleId]);
+
+        return $this->render('articles/show.html.twig', [
+            'article' => $article,
+            'commentaires' => $commentaires
+        ]);
     }
 }

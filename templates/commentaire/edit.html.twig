@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Commentaire{% endblock %}
+
+{% block body %}
+   <div class="container mt-5">
+    <h1>Ajouter un utilisateur</h1>
+    <form method="post" class="mt-4">
+
+        <div class="form-group mt-3">
+            <label for="contenu">Contenu</label>
+            <input value="{{commentaire.contenu}}" type="contenu" id="contenu" name="contenu" class="form-control" required>
+        </div>
+
+        <button type="submit" class="btn btn-secondary btn-sm">Enregistrer</button>
+        <a href="{{ path('article_show',{ 'id': article.id}) }}" class="btn btn-secondary mt-3">Retour</a>
+    </form>
+</div>
+{% endblock %}

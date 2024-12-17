@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ArticlesRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ArticlesRepository::class)]
@@ -22,6 +24,17 @@ class Articles
     #[ORM\ManyToOne(inversedBy: 'id_categorie')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Categorie $id_categorie = null;
+
+    /**
+     * @var Collection<int, Commentaire>
+     */
+    #[ORM\OneToMany(targetEntity: Commentaire::class, mappedBy: 'id_article')]
+    private Collection $id_commentaires;
+
+    public function __construct()
+    {
+        $this->id_commentaires = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -60,6 +73,36 @@ class Articles
     public function setIdCategorie(?categorie $id_categorie): static
     {
         $this->id_categorie = $id_categorie;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Commentaire>
+     */
+    public function getIdCommentaires(): Collection
+    {
+        return $this->id_commentaires;
+    }
+
+    public function addIdCommentaire(Commentaire $idCommentaire): static
+    {
+        if (!$this->id_commentaires->contains($idCommentaire)) {
+            $this->id_commentaires->add($idCommentaire);
+            $idCommentaire->setIdArticle($this);
+        }
+
+        return $this;
+    }
+
+    public function removeIdCommentaire(Commentaire $idCommentaire): static
+    {
+        if ($this->id_commentaires->removeElement($idCommentaire)) {
+            // set the owning side to null (unless already changed)
+            if ($idCommentaire->getIdArticle() === $this) {
+                $idCommentaire->setIdArticle(null);
+            }
+        }
 
         return $this;
     }

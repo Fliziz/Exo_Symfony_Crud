@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Articles{% endblock %}
+
+{% block body %}
+    <h1>Article</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ article.id }}</td>
+            </tr>
+            <tr>
+                <th>Titre</th>
+                <td>{{ article.titre }}</td>
+            </tr>
+            <tr>
+                <th>Contenu</th>
+                <td>{{ article.contenu }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div>
+        {%for commentaire in commentaires %}
+         <table class="table">
+        <tbody>
+            <tr>
+                <td>{{ commentaire.idUser.name }}</td>
+                
+                <td>
+                    {% if app.user and app.user.id == commentaire.idUser.id %}
+                    <a href="{{ path('commentaire_edit', {'id' : article.id , 'com': commentaire.id}) }}">editer</a>
+                    {% endif %}
+
+                    {% if app.user and app.user.id == commentaire.idUser.id or is_granted('ROLE_ADMIN') %}
+                    <form action="{{ path('commentaire_delete', {'article' : article.id ,'id': commentaire.id}) }}" method="post" style="display: inline;">
+
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ commentaire.id) }}">
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?');">Supprimer</button>
+        
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>{{commentaire.contenu}}</td>
+            </tr>
+        </tbody>
+    </table>
+        {%endfor%}
+    </div>
+    <div>
+         <a href="{{ path('commentaire_new',{ 'id': article.id}) }}">Ajouter commentaire</a>
+    </div>
+    <a href="{{ path('articles_index') }}">Retour</a>
+
+{% endblock %}

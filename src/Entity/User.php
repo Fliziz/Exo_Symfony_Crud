@@ -4,6 +4,8 @@
 // Cette classe représente une entité utilisateur qui est mappée à la base de données
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM; // On importe les annotations de Doctrine pour gérer la persistance des données en base de données
 use Symfony\Component\Security\Core\User\UserInterface; // On importe l'interface UserInterface de Symfony pour la gestion des utilisateurs
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface; // On importe PasswordAuthenticatedUserInterface pour gérer l'authentification avec mot de passe
@@ -26,7 +28,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface // La cl
     private ?string $password = null; // Propriété privée pour stocker le mot de passe de l'utilisateur
 
     #[ORM\Column(length: 50)] // La propriété 'name' est une colonne avec une longueur maximale de 50 caractères
-    private ?string $name = null; // Propriété privée pour stocker le nom de l'utilisateur
+    private ?string $name = null;
+
+    /**
+     * @var Collection<int, Commentaire>
+     */
+    #[ORM\OneToMany(targetEntity: Commentaire::class, mappedBy: 'id_user')]
+    private Collection $id_commentaires;
+
+    public function __construct()
+    {
+        $this->id_commentaires = new ArrayCollection();
+    } // Propriété privée pour stocker le nom de l'utilisateur
 
     // Méthode pour obtenir l'ID de l'utilisateur. Elle renvoie l'ID de l'entité
     public function getId(): ?int { return $this->id; }
@@ -83,5 +96,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface // La cl
     public function getUserIdentifier(): string 
     {
         return $this->email; // Retourne l'email de l'utilisateur comme identifiant unique
+    }
+
+    /**
+     * @return Collection<int, Commentaire>
+     */
+    public function getIdCommentaires(): Collection
+    {
+        return $this->id_commentaires;
+    }
+
+    public function addIdCommentaire(Commentaire $idCommentaire): static
+    {
+        if (!$this->id_commentaires->contains($idCommentaire)) {
+            $this->id_commentaires->add($idCommentaire);
+            $idCommentaire->setIdUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeIdCommentaire(Commentaire $idCommentaire): static
+    {
+        if ($this->id_commentaires->removeElement($idCommentaire)) {
+            // set the owning side to null (unless already changed)
+            if ($idCommentaire->getIdUser() === $this) {
+                $idCommentaire->setIdUser(null);
+            }
+        }
+
+        return $this;
     }
 }
