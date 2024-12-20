@@ -16,17 +16,35 @@ class ArticlesRepository extends ServiceEntityRepository
         parent::__construct($registry, Articles::class);
     }
 
+    public function findByTitleAndCategory(?string $recherche, ?int $Categorie): array
+    {
+        $data = $this->createQueryBuilder('articles'); //l'entité Articles    
+
+        // Si un mot-clé est présent, ajoute une condition LIKE pour le titre
+        if ($recherche) {
+            $data->andWhere('articles.titre LIKE :recherche')
+               ->setParameter('recherche', '%' . $recherche . '%');
+        }
+
+        // Si un filtre de catégorie est présent, ajoute une condition pour l'ID de catégorie
+        if ($Categorie) {
+            $data->andWhere('articles.id_categorie = :categorie')
+               ->setParameter('categorie', $Categorie);
+        }
+
+        return $data->getQuery()->getResult();
+    }
     //    /**
     //     * @return Articles[] Returns an array of Articles objects
     //     */
-    //    public function findByExampleField($value): array
+    //    public function findByTitle($value): array
     //    {
     //        return $this->createQueryBuilder('articles')
-    //            ->andWhere('articles.categorie = :val')
-    //            ->setParameter('val', $value)
+    //            ->andWhere('articles.titre LIKE :val')
+    //            ->setParameter('val', '%'.$value.'%')
     //            ->getQuery()
     //            ->getResult()
-    //        ;
+    //            ;
     //    }
 
     //    public function findOneBySomeField($value): ?Articles

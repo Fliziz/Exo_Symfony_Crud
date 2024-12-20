@@ -30,11 +30,10 @@ security:
             check_path: /api/login  # La route où les données de connexion sont envoyées
             success_handler: lexik_jwt_authentication.handler.authentication_success  # Si la connexion réussit, la réponse JSON sera gérée ici
             failure_handler: lexik_jwt_authentication.handler.authentication_failure  # Si la connexion échoue, la réponse JSON sera gérée ici
-    
-    # api:
-    #   pattern: ^/api  # Cette route serait spécifique aux API (connexion via API)
-    #   stateless: true  # Indique que l'API ne maintient pas de session (stateless)
-    #   jwt: ~
+    api:
+            pattern: ^/api
+            stateless: true
+            jwt: ~
 
     # Configuration principale du firewall pour toutes les autres routes
     main:
@@ -68,3 +67,5 @@ security:
     - { path: ^/articles/new , roles: ROLE_ADMIN }
 
     - { path: ^/articles/edit , roles: ROLE_ADMIN }
+
+    - {path: ^/api/commentaire , roles: ROLE_ADMIN }

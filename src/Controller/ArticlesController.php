@@ -17,19 +17,65 @@ use Doctrine\ORM\EntityManagerInterface;
 class ArticlesController extends AbstractController
 {
 
-    #[Route('/', name: 'articles_index', methods: ['GET','POST'])] // Cette annotation définit la route pour afficher la liste des utilisateurs. 'GET' signifie que cette route répondra aux requêtes HTTP GET (les requêtes pour obtenir des données)
-    public function index(ArticlesRepository $articlesRepository,Request $request,CategorieRepository $categoriesRepository): Response // La méthode index() récupère tous les utilisateurs de la base de données via UserRepository et les affiche
+    #[Route('/', name: 'articles_index', methods: ['GET', 'POST'])]
+    public function index(ArticlesRepository $articlesRepository, CategorieRepository $categoriesRepository, Request $request): Response
     {   
-        $categories = $categoriesRepository->findAll();
-        if($request->isMethod('POST')){
-            $articles = $articlesRepository->findBy(['id_categorie' => $request->request->get('filtre')]);//findBy permet de retourner un tableau d'objet d'articles, en fonction des critaire ['id_categorie' définie l'attribut a récupérer => ou c'est egale a la requete qui retourne le filtre donc soit 1 (donc jeux video) ou 2 (donc anime)]
-            dd($articles);
-        }else{
-            $articles = $articlesRepository->findAll(); // Appelle la méthode findAll() du UserRepository pour récupérer tous les utilisateurs dans la base de données
-        }
-       
-        return $this->render('articles/index.html.twig', ['articles' => $articles , 'categories' => $categories]); // Rendu de la vue 'user/index.html.twig', avec la liste des utilisateurs passée à la vue
+        $categories = $categoriesRepository->findAll(); // Récupère toutes les catégories
+
+        // Récupération des valeurs des filtres
+        $recherche = $request->request->get('recherche'); // Mot-clé pour la recherche
+        $categorie = $request->request->get('filtre');    // ID de la catégorie à filtrer
+
+        // Appel à la méthode du repository pour combiner recherche et filtre
+        $articles = $articlesRepository->findByTitleAndCategory($recherche, $categorie);
+
+        $selectcategorie = $categorie;
+
+        return $this->render('articles/index.html.twig', [
+            'articles' => $articles,
+            'categories' => $categories,
+            'selectcategorie' => $selectcategorie, // Pour garder la catégorie sélectionnée dans le formulaire
+            'recherche' => $recherche       // Pour garder le terme de recherche dans le formulaire
+        ]);
     }
+
+    // #[Route('/', name: 'articles_index', methods: ['GET','POST'])] // Cette annotation définit la route pour afficher la liste des utilisateurs. 'GET' signifie que cette route répondra aux requêtes HTTP GET (les requêtes pour obtenir des données)
+    // public function index(ArticlesRepository $articlesRepository,Request $request,CategorieRepository $categoriesRepository): ?Response // La méthode index() récupère tous les utilisateurs de la base de données via UserRepository et les affiche
+    // {   
+
+        
+    //     // if($request->request->get('filtre') == NULL){
+    //     //     $categories = $categoriesRepository->findAll();
+    //     //     $articles = $articlesRepository->findAll(); // Appelle la méthode findAll() du UserRepository pour récupérer tous les utilisateurs dans la base de donnée
+    //     //     return $this->render('articles/index.html.twig', ['articles' => $articles , 'categories' => $categories]); // Rendu de la vue 'user/index.html.twig', avec la liste des utilisateurs passée à la vue
+    //     // }
+
+    //     // return $this->render('articles/index.html.twig', filtre($articlesRepository,$request,$categoriesRepository)); // Rendu de la vue 'user/index.html.twig', avec la liste des utilisateurs passée à la vue
+
+
+    // }
+
+    // #[Route('/', name: 'articles_filtre', methods: ['GET','POST'])] // Cette annotation définit la route pour afficher la liste des utilisateurs. 'GET' signifie que cette route répondra aux requêtes HTTP GET (les requêtes pour obtenir des données)
+    // public function filtre(ArticlesRepository $articlesRepository,Request $request,CategorieRepository $categoriesRepository): Response // La méthode index() récupère tous les utilisateurs de la base de données via UserRepository et les affiche
+    // {   
+    //     $categories = $categoriesRepository->findAll();
+
+    //     $articles = $articlesRepository->findBy(['id_categorie' => $request->request->get('filtre')]);//findBy permet de retourner un tableau d'objet d'articles, en fonction des critaire ['id_categorie' définie l'attribut a récupérer => ou c'est egale a la requete qui retourne le filtre donc soit 1 (donc jeux video) ou 2 (donc anime)]
+       
+    //     return $articles AND $categories; // Rendu de la vue 'user/index.html.twig', avec la liste des utilisateurs passée à la vue
+    // }
+
+    // #[Route(name: 'articles_recherche', methods: ['POST'])] 
+    // public function recherche(ArticlesRepository $articlesRepository,CategorieRepository $categoriesRepository,Request $request): Response 
+    // {   
+    //     $categories = $categoriesRepository->findAll();
+        
+    //     $articles = $articlesRepository->findByTitle($request->request->get('recherche'));
+
+    //     return $this->render('articles/index.html.twig', ['articles' => $articles , 'categories' => $categories]);
+    // }
+
+
 
     #[Route('/new', name: 'articles_new', methods: ['GET', 'POST'])] // La route '/new' pour afficher le formulaire de création et traiter l'envoi du formulaire
 

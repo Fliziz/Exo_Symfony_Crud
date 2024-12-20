@@ -11,6 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 #[Route('/articles')]
 final class CommentaireController extends AbstractController
@@ -18,9 +19,18 @@ final class CommentaireController extends AbstractController
     #[Route(name: 'commentaire_index', methods: ['GET'])]
     public function index(CommentaireRepository $commentaireRepository): Response
     {
-        return $this->render('commentaire/index.html.twig', [
-            'commentaires' => $commentaireRepository->findAll(),
-        ]);
+        $commentaires = $commentaireRepository->findAll();
+
+        $data = array_map(function (Commentaire $commentaire) {
+            return [
+                'id' => $commentaire->getId(),
+                'id_user_id' => $commentaire-> getIdUser(),
+                'id_article_id' => $commentaire->getIdArticle(),
+                'contenu' => $commentaire->getContenu(),
+            ];
+            }, $commentaires);
+        return new JsonResponse($data, JsonResponse::HTTP_OK);
+
     }
 
     #[Route( '{id}/commentaire/new',name: 'commentaire_new', methods: ['GET', 'POST'])]
@@ -32,7 +42,7 @@ final class CommentaireController extends AbstractController
             
             $commentaire = new Commentaire(); // On crée une nouvelle instance de l'entité commentaire
 
-            // On récupère les données soumises dans le formulaire et on les attribue à l'entité $user
+            // On récupère les données soumises dans le formulaire et on les attribue à l'entité $commentaire
             // $commentaire->setIdArticle($request->request->get('article'));
 
             $commentaire->setIdUser($this->getUser()); // Attribue le titre depuis la requête
@@ -40,7 +50,7 @@ final class CommentaireController extends AbstractController
             $commentaire->setIdArticle($article);
             $commentaire->setContenu($request->request->get('contenu')); // Attribue le contunu depuis la requête        
             
-            $em->persist($commentaire); // Prépare l'entité $user à être sauvegardée dans la base de données
+            $em->persist($commentaire); // Prépare l'entité $commentaire à être sauvegardée dans la base de données
             $em->flush(); // Sauvegarde réellement les données dans la base de données
             
             return $this->redirectToRoute('article_show', [
@@ -63,12 +73,12 @@ final class CommentaireController extends AbstractController
         
         if($request->isMethod('POST')){
 
-            // On récupère les données soumises dans le formulaire et on les attribue à l'entité $user
+            // On récupère les données soumises dans le formulaire et on les attribue à l'entité $commentaire
             // $commentaire->setIdArticle($request->request->get('article'));
 
             $commentaire->setContenu($request->request->get('contenu')); // Attribue le contunu depuis la requête        
             
-            $em->persist($commentaire); // Prépare l'entité $user à être sauvegardée dans la base de données
+            $em->persist($commentaire); // Prépare l'entité $commentaire à être sauvegardée dans la base de données
             $em->flush(); // Sauvegarde réellement les données dans la base de données
             
             return $this->redirectToRoute('article_show', [
@@ -82,14 +92,25 @@ final class CommentaireController extends AbstractController
         ]);
     }
 
-    #[Route('{article}/commentaire/delete/{id}',name: 'commentaire_delete', methods: ['POST'])]
-    public function delete($article,Request $request,Commentaire $commentaire , EntityManagerInterface $entityManager, CommentaireRepository $commentaireRepository): Response
+    #[Route('/{article}/commentaire/delete/{id}',name: 'commentaire_delete', methods: ['POST'])]
+    public function delete($article,Commentaire $commentaire , EntityManagerInterface $entityManager): Response 
     {       
             $entityManager->remove($commentaire);
             $entityManager->flush();   
 
-        return $this->redirectToRoute('article_show', [
-            'id'=> $article
-        ], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('article_show', [
+                'id'=> $article
+            ], Response::HTTP_SEE_OTHER);
+
+    }
+
+
+    #[Route(name: 'api_commentaire_delete', methods: ['DELETE'])]
+    public function delete_api(Commentaire $commentaire , EntityManagerInterface $entityManager): Response 
+    {       
+            $entityManager->remove($commentaire);
+            $entityManager->flush();   
+
+            return new JsonResponse(['status' => 'User deleted'], JsonResponse::HTTP_OK);
     }
 }

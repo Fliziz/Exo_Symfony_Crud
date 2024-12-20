@@ -18,6 +18,7 @@
         <div class="form-group mt-3">
             <label for="id_categorie">categorie</label>
             <select name="id_categorie" id="id_categorie">
+                <option value="">-- Toutes les catégories --</option>
                 {% for categorie in categories %}
                     <option value="{{ categorie.id }}">{{ categorie.nom}}</option>
                 {% endfor %}
